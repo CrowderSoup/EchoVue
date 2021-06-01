@@ -1,7 +1,11 @@
-dev: dev_server dev_app
+run: dev-app dev-server
 
-dev_server:
+dev-server:
 	go run cmd/server/main.go
 
-dev_app:
-	cd app && yarn serve
+dev-app:
+	cd app && yarn build
+
+watch:
+	ulimit -n 1000 #increase the file watch limit, might required on MacOS
+	reflex -t 500ms -s -r '\.go$$' make run
