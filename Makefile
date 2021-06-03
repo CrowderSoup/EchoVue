@@ -1,11 +1,11 @@
-run: dev-app dev-server
+run: build-app run-server
 
-dev-server:
+run-server:
 	go run cmd/server/main.go
 
-dev-app:
+build-app:
 	cd app && yarn build
 
 watch:
 	ulimit -n 1000 #increase the file watch limit, might required on MacOS
-	reflex -t 500ms -s -r '\.go$$' make run
+	reflex -c reflex.conf
