@@ -1,7 +1,6 @@
-package web
+package server
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/CrowderSoup/EchoVue/server/config"
@@ -12,8 +11,8 @@ import (
 )
 
 // Server serves up our application
-type Server struct {
-	echo *echo.Echo
+type server struct {
+	assetsDir string
 }
 
 // NewServerParams params for new server
@@ -24,51 +23,29 @@ type NewServerParams struct {
 	Config   *config.Config
 }
 
-// NewWebServer returns a web server
-func NewWebServer(p NewServerParams) *Server {
-	// Remove Trailing Slashes from requests
-	p.Instance.Pre(middleware.RemoveTrailingSlash())
-
-	// Static dir
-	p.Instance.Static("/css", fmt.Sprintf("%s/css", p.Config.AssetsDir))
-	p.Instance.Static("/img", fmt.Sprintf("%s/img", p.Config.AssetsDir))
-	p.Instance.Static("/js", fmt.Sprintf("%s/js", p.Config.AssetsDir))
-
-	// Middleware
-	p.Instance.Use(middleware.Logger())
-	p.Instance.Use(middleware.Recover())
-
-	// Front-end Entrypoint
-	p.Instance.File("/", fmt.Sprintf("%s/index.html", p.Config.AssetsDir))
-
-	return &Server{
-		echo: p.Instance,
+// NewServer returns a web server
+func newServer(p NewServerParams) *server {
+	return &server{
+		assetsDir: p.Config.AssetsDir,
 	}
 }
 
-// InvokeServer starts up our web server
-func InvokeServer(
-	lc fx.Lifecycle,
-	c *config.Config,
-	server *Server,
-) {
-	lc.Append(
-		fx.Hook{
-			OnStart: func(ctx context.Context) error {
-				go server.echo.Start(fmt.Sprintf(":%d", c.Port))
-				return nil
-			},
-			OnStop: func(ctx context.Context) error {
-				return server.echo.Close()
-			},
-		},
-	)
-}
+func (s *server) config(e *echo.Echo) {
+	// Remove Trailing Slashes from requests
+	e.Pre(middleware.RemoveTrailingSlash())
 
-// Module provided to fx
-var Module = fx.Options(
-	fx.Provide(
-		echo.New,
-		NewWebServer,
-	),
-)
+	// Static dir
+	e.Static("/css", fmt.Sprintf("%s/css", s.assetsDir))
+	e.Static("/img", fmt.Sprintf("%s/img", s.assetsDir))
+	e.Static("/js", fmt.Sprintf("%s/js", s.assetsDir))
+
+	// Middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	// Front-end Entrypoint
+	e.File("/", fmt.Sprintf("%s/index.html", s.assetsDir))
+
+	// API Endpoints
+	e.GET("/health", s.health)
+}
