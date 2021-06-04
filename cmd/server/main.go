@@ -1,19 +1,23 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/CrowderSoup/EchoVue/server/config"
+	web "github.com/CrowderSoup/EchoVue/server/server"
+
+	"go.uber.org/fx"
 )
 
 func main() {
-	e := echo.New()
+	bundle := fx.Options(
+		config.Module,
+		web.Module,
+	)
+	app := fx.New(
+		bundle,
+		fx.Invoke(web.InvokeServer),
+	)
 
-	// Static Files
-	e.Static("/css", "./app/dist/css")
-	e.Static("/js", "./app/dist/js")
-	e.Static("/img", "./app/dist/img")
+	app.Run()
 
-	// Front-end Entrypoint
-	e.File("/", "./app/dist/index.html")
-
-	e.Logger.Fatal(e.Start(":1313"))
+	<-app.Done()
 }
