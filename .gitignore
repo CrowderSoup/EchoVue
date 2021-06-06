@@ -1,5 +1,8 @@
 .DS_Store
 
+# SQLite DB
+*.db
+
 # Vue App build
 app/dist
 app/node_modules

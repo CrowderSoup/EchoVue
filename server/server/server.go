@@ -12,7 +12,9 @@ import (
 
 // Server serves up our application
 type server struct {
-	assetsDir string
+	assetsDir     string
+	jwtPublicKey  string
+	jwtPrivateKey string
 }
 
 // NewServerParams params for new server
