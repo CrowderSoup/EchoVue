@@ -10,6 +10,13 @@ type Config struct {
 	Port        int    `default:"1313"`
 	Environment string `default:"development"`
 	AssetsDir   string `default:"./app/dist"`
+	DBConfig    DBConfig
+}
+
+// DBConfig Config for the database
+type DBConfig struct {
+	ConnectionString string `default:"data.db"`
+	Dialect          string `default:"sqlite3"`
 }
 
 // LoadConfig loads and returns our app config
